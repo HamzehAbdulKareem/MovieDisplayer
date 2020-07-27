@@ -107,7 +107,7 @@ public class recent extends Fragment {
                                     ids.add(id);
                                     Log.i("result",oneObjectsItem);
                                 } catch (JSONException e) {
-                                    // Oops
+
                                 }
                             }
                             adapter.addItems(titleNames);
@@ -127,7 +127,6 @@ public class recent extends Fragment {
 
 
 
-        // set up the RecyclerView
         setOnClickListner();
 
         final RecyclerView recyclerView = root.findViewById(R.id.recentView);
