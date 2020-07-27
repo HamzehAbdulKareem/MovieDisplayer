@@ -33,6 +33,7 @@ import java.util.ArrayList;
  * create an instance of this fragment.
  */
 public class recent extends Fragment {
+    final ArrayList<Integer> ids = new ArrayList<>();
 
     Button button;
     String jsonString;
@@ -84,6 +85,7 @@ public class recent extends Fragment {
         View root = inflater.inflate(R.layout.fragment_recent, container, false);
         final ArrayList<String> titleNames = new ArrayList<>();
 
+
         RequestQueue queue = Volley.newRequestQueue(getContext());
         String url ="https://api.themoviedb.org/3/movie/popular?api_key=306336cb31c7909d625fb19cfe981f1a&language=en-US&page=1";
 
@@ -100,7 +102,9 @@ public class recent extends Fragment {
                                 try {
                                     JSONObject oneObject = resultsArray.getJSONObject(i);
                                     String oneObjectsItem = oneObject.getString("title");
+                                    Integer id = oneObject.getInt("id");
                                     titleNames.add(oneObjectsItem);
+                                    ids.add(id);
                                     Log.i("result",oneObjectsItem);
                                 } catch (JSONException e) {
                                     // Oops
@@ -138,8 +142,12 @@ public class recent extends Fragment {
         listener = new RecyclerViewAdapter.ItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent i = new Intent(getContext(),Details.class);
-                startActivity(i);            }
+                Intent intent = new Intent(getContext(),Details.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("ID",ids.get(position).toString() );
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
         };
     }
 

@@ -4,12 +4,28 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,7 +33,9 @@ import android.widget.Toast;
  * create an instance of this fragment.
  */
 public class topRated extends Fragment {
-
+    RecyclerViewAdapter adapter;
+    final ArrayList<Integer> ids = new ArrayList<>();
+    RecyclerViewAdapter.ItemClickListener listener;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -63,16 +81,72 @@ public class topRated extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_top_rated, container, false);
-        button = root.findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
+        final ArrayList<String> titleNames = new ArrayList<>();
+
+
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        String url ="https://api.themoviedb.org/3/movie/top_rated?api_key=306336cb31c7909d625fb19cfe981f1a&language=en-US&page=1";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        try {
+                            JSONObject object = new JSONObject(response);
+                            JSONArray resultsArray = object.getJSONArray("results");
+                            for (int i=0; i < resultsArray.length(); i++)
+                            {
+                                try {
+                                    JSONObject oneObject = resultsArray.getJSONObject(i);
+                                    String oneObjectsItem = oneObject.getString("title");
+                                    Integer id = oneObject.getInt("id");
+                                    titleNames.add(oneObjectsItem);
+                                    ids.add(id);
+                                    Log.i("result",oneObjectsItem);
+                                } catch (JSONException e) {
+                                    // Oops
+                                }
+                            }
+                            adapter.addItems(titleNames);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Log.i("response",response);
+                    }
+                }, new Response.ErrorListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "this is top rated", Toast.LENGTH_SHORT).show();
-                Intent i = new Intent(getContext(),Details.class);
-                startActivity(i);
+            public void onErrorResponse(VolleyError error) {
+                Log.i("error","That didnt work " + error);
             }
         });
-        return root;
+        queue.add(stringRequest);
+
+
+
+
+        // set up the RecyclerView
+        setOnClickListner();
+
+        final RecyclerView recyclerView = root.findViewById(R.id.recentView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new RecyclerViewAdapter(getContext(), titleNames,listener);
+        recyclerView.setAdapter(adapter);
+
+        return recyclerView;
+    }
+
+    private void setOnClickListner() {
+        listener = new RecyclerViewAdapter.ItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Intent intent = new Intent(getContext(),Details.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("ID",ids.get(position).toString() );
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        };
 
 
     }
