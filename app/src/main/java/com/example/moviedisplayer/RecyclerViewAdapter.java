@@ -25,7 +25,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // data is passed into the constructor
     RecyclerViewAdapter(Context context, List<String> data,ItemClickListener list) {
         this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
+//        this.mData = data;
         this.mClickListener = list;
     }
 
@@ -43,6 +43,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
+        if(mData == null)
+            return 0;
         return mData.size();
     }
 
@@ -76,7 +78,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void onItemClick(View view, int position);
     }
     public void addItems(ArrayList<String> names){
-        mData.addAll(names);
+        mData = names;
         notifyDataSetChanged();
     }
 }
